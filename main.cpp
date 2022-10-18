@@ -620,7 +620,7 @@ map < pair <string, string>,int > getTransportationCosts(){
                         else if (separators == 1) costic += text[i];
                     }
                     int aux = stoi(costic);
-                    cout<<destino<<" "<<destino2<<"\n";
+                    //cout<<destino<<" "<<destino2<<"\n";
                     costs[{destino,destino2}] = aux;
                 }
                 
@@ -795,6 +795,7 @@ void clientMenu(){
     cout<<"Press 3 to take a look at a specific destination and its features\n";
     cout<<"Press 4 to see all of your bookings and purchases\n";
     cout<<"Press 5 to log out\n";
+    cout<<"------------------------\n";
 }
 
 void clientMode(string username){
