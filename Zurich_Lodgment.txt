@@ -1,0 +1,3 @@
+ETH Zurich|12000|hotel|Swiss Hotels|yes|For young students
+Alps House|5600|airbnb|Lazlo Kleinheizler|4|Cool view to the Alps
+Hotel Riuws|18500|hotel|Rouwen Hotels|yes|Luxurious hotel

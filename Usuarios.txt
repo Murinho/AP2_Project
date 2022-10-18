@@ -1,0 +1,2 @@
+Muro|1234|Admin|
+Murinho|4567|Client|

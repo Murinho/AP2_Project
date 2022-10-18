@@ -1,0 +1,2 @@
+Berkenfield|800
+Bucarest|400

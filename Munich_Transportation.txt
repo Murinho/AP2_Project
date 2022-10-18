@@ -1,0 +1,2 @@
+Berkenfield|1000
+London|3000

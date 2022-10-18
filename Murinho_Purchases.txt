@@ -1,0 +1,2 @@
+Transportation|5900|London-->Shanghai-->Bucarest-->Zurich|
+Lodgment|22400|Alps House|airbnb|

@@ -1,0 +1,3 @@
+Berkenfield|2000
+Bucarest|1500
+London|4000

@@ -1,0 +1,3 @@
+Berkenfield|1300
+Zurich|400
+Shanghai|1500
