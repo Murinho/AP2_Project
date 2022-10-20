@@ -1,2 +1,3 @@
 Transportation|5900|London-->Shanghai-->Bucarest-->Zurich|
+Lodgment|22400|Alps House|airbnb|Transportation|3600|Shanghai-->Bucarest-->Berkenfield-->Zurich|
 Lodgment|22400|Alps House|airbnb|

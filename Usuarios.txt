@@ -1,2 +1,3 @@
 Muro|1234|Admin|
 Murinho|4567|Client|
+User1|1234|Client|
