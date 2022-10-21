@@ -2,6 +2,7 @@
 #include <ctime>
 #include "Usuario.h"
 #include "Lodgment.h"
+#include "TravelMoment.h"
 #define ll long long
 #define pb push_back
 
@@ -14,6 +15,10 @@ void clearConsole(){
 
 int randomizer(int minic, int maxic){
     return rand()%(maxic-minic+1) + minic;
+}
+
+void delay(int secs) {
+  for(int i = (time(NULL) + secs); time(NULL) != i; time(NULL));
 }
 
 set<Usuario> getListUsers(){
@@ -542,11 +547,59 @@ set <string> getTravelDayInfo(int day){
     return st;
 }
 
+vector <TravelMoment> getTripsOrder(int day){
+    vector <TravelMoment> a;
+    set <string> st = getTravelDayInfo(day);
+    map < pair <string, string>, int > tempos = getTransportationTimes();
+    string username = "", destino = "";
+    for (auto route : st){
+        username = "";
+        destino = "";
+        vector <string> dests;
+        int tam = route.size();
+        int sepp = 0;
+        for (int i = 0; i<tam; i++){
+            if (route[i] == '|'){
+                sepp++;
+                if (sepp == 2){
+                    dests.pb(destino);
+                    destino = "";
+                }
+            }
+            else if (route[i] == '>' || i+1 == tam){
+                //cout<<destino<<" ";
+                dests.pb(destino);
+                destino = "";
+            }
+            else if (sepp == 0) username += route[i];
+            else if (sepp == 1) destino += route[i];
+            if (sepp == 2) break;
+        }
+        TravelMoment aux(username,dests[0],0);
+        a.pb(aux);
+        int anttime = 0;
+        for (int i = 1; i<dests.size(); i++){
+            anttime += tempos[{dests[i-1],dests[i]}];
+            TravelMoment aux2(username,dests[i],anttime);
+            a.pb(aux2);
+        }
+    }
+    sort(a.begin(),a.end());
+    return a;
+}
 
 
 void * simulation(void * date){
     int * day = (int*)date;
-
+    vector <TravelMoment> a = getTripsOrder(*day);
+    for (int i = 0; i<a.size(); i++){
+        if (a[i].getCurrtime() == 0) cout<<"User: "<<a[i].getUsername()<<", started his trip from: "<<a[i].getPlace()<<"\n";
+        else{
+            delay(a[i].getCurrtime()-a[i-1].getCurrtime());
+            cout<<"User: "<<a[i].getUsername()<<", arrived to "<<a[i].getPlace()<<" at the hour :"<<a[i].getCurrtime()<<"\n";
+        }
+    } 
+    pthread_exit(NULL);
 }
 
 void adminMenu(){
@@ -592,6 +645,16 @@ void adminMode(string username){
         }
         else if (opc == "11") clearConsole(), getClients();
         else if (opc == "12"){
+            pthread_t hilo;
+            time_t tim = time(0);
+            tm *gottime = localtime(&tim);
+            int dia = gottime->tm_yday;
+            int * day = &dia;
+            int res = pthread_create( &hilo, NULL, &simulation , (void*)day);
+            pthread_join( hilo, NULL); 
+            if (res) cout<<"Error in the simulation\n";
+        }
+        else if (opc == "13"){
             clearConsole();
             break;
         }
@@ -996,7 +1059,6 @@ void loginAccount(){
 
 int main(){
     while(true){
-        map <Usuario,int> mp;
         loginMenu();
         string opc;
         cin>>opc;
