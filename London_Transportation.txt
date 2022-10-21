@@ -1,2 +1,2 @@
-Munich|3000
-Shanghai|4000
+Munich|3000|5
+Shanghai|4000|8

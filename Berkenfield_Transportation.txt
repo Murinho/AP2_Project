@@ -1,4 +1,4 @@
-Munich|1000
-Zurich|800
-Bucarest|1300
-Shanghai|2000
+Munich|1000|1
+Zurich|800|4
+Bucarest|1300|6
+Shanghai|2000|10

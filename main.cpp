@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <ctime>
 #include "Usuario.h"
 #include "Lodgment.h"
 #define ll long long
@@ -61,6 +62,36 @@ set <string> getDestinations(){
         archivo.close();
     }
     return st;
+}
+
+map < pair <string, string>,int > getTransportationTimes(){
+    map < pair <string, string>, int > tempos;
+    set <string> st = getDestinations();
+    ifstream archivo;
+    string text;
+    for (auto destino : st){
+        archivo.open(destino + "_Transportation.txt", ios::in);
+        if (!archivo.fail()){
+            while(!archivo.eof()){
+                getline(archivo,text);
+                if(text.size() > 0){
+                    string destino2 = "", tempo = "";
+                    int separators = 0;
+                    for (int i = 0; i<text.size(); i++){
+                        if (text[i] == '|') separators++;
+                        else if (separators == 0) destino2 += text[i];
+                        else if (separators == 2) tempo += text[i];
+                    }
+                    int aux = stoi(tempo);
+                    //cout<<destino<<" "<<destino2<<"\n";
+                    tempos[{destino,destino2}] = aux;
+                }
+                
+            }
+        }
+        archivo.close();
+    }
+    return tempos;
 }
 
 void addDestination(){
@@ -192,10 +223,12 @@ void deleteDestination(){
     clearConsole();
 }
 
-void addTransportation(string desta, string destb, int cost){ //From A to the B
+void addTransportation(string desta, string destb, int cost, int tempo){ //From A to the B
     ofstream ofs;
     destb += "|";
     destb += to_string(cost);
+    destb += "|";
+    destb += to_string(tempo);
     ofs.open(desta + "_Transportation.txt",ios::app);
     if (!ofs.fail()){
         ofs<<destb<<"\n";
@@ -207,7 +240,7 @@ void addTransportationMenu(){
     set <string> st = getDestinations();
     string desta,destb;
     bool idavuelta;
-    int cost;
+    int cost,tempo;
     char opc;
     cout<<"Enter the names of both destinations:\n";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -215,11 +248,13 @@ void addTransportationMenu(){
     getline(cin,destb);
     cout<<"Enter the cost of the transportation\n";
     cin>>cost;
+    cout<<"Enter the time of travel between the two cities in minutes\n";
+    cin>>tempo;
     cout<<"Enter '1' if the transportation is round or any key if it just goes from point A --> B\n";
     cin>>opc;
     if (st.count(desta) && st.count(destb)){
-        addTransportation(desta,destb,cost);
-        if (opc == '1') addTransportation(destb,desta,cost);
+        addTransportation(desta,destb,cost,tempo);
+        if (opc == '1') addTransportation(destb,desta,cost,tempo);
 
         cout<<"New transportation between: ";
         if (opc == '1') cout<<desta<<" <----> "<<destb<<" ";
@@ -492,6 +527,28 @@ void specificDestination(string destino){
     clearConsole();
 }
 
+set <string> getTravelDayInfo(int day){
+    set <string> st;
+    string text;
+    ifstream ifs;
+    ifs.open("Trips_" + to_string(day) + ".txt",ios::in);
+    if (!ifs.fail()){
+        while(!ifs.eof()){
+            getline(ifs,text);
+            if (text.size() > 0) st.insert(text);
+        }
+        ifs.close();
+    }
+    return st;
+}
+
+
+
+void * simulation(void * date){
+    int * day = (int*)date;
+
+}
+
 void adminMenu(){
     cout<<"------------------------\n";
     cout<<"Press 1 to add a destination\n";
@@ -505,7 +562,8 @@ void adminMenu(){
     cout<<"Press 9 to see the list of all the destinations\n";
     cout<<"Press 10 to see the features of a specific destination\n";
     cout<<"Press 11 to see the list of all the clients\n";
-    cout<<"Press 12 to log out\n";
+    cout<<"Press 12 to run simulation of the day\n";
+    cout<<"Press 13 to log out\n";
 }
 
 void adminMode(string username){
@@ -555,25 +613,27 @@ void myPurchases(string username){
     clearConsole();
 }
 vector < pair <vector<string>, int> >posroutes;
+vector < pair <vector<string>, int> >postimes;
 //DFS  
-void dfsRoutes(map <string, vector <string> > adj, map < pair <string, string>, int> costs, vector <string> ruta,string currcity, string b, int minic, int maxic, set <string> st, int totcost){
+void dfsRoutes(map <string, vector <string> > adj, map < pair <string, string>, int> costs, map < pair <string,string>, int > tempos, vector <string> ruta,string currcity, string b, int minic, int maxic, set <string> st, int totcost, int tottime){
     st.insert(currcity);
     ruta.pb(currcity);
     if (currcity == b){
         if (minic <= totcost && totcost <= maxic){
-            cout<<posroutes.size()+1<<". $"<<totcost<<", route:\n";
+            cout<<posroutes.size()+1<<". $"<<totcost<<", total time: "<<tottime<<", route:\n";
             for (auto r: ruta){
                 cout<<r;
                 if (r != b) cout<<"-->";
             }
             cout<<"\n";
             posroutes.pb({ruta,totcost});
+            postimes.pb({ruta,tottime});
         }
     }
     else{
         for (auto r: adj[currcity]){
             if (!st.count(r)){
-                dfsRoutes(adj,costs,ruta,r,b,minic,maxic,st,totcost+costs[{r,currcity}]);
+                dfsRoutes(adj,costs,tempos,ruta,r,b,minic,maxic,st,totcost+costs[{r,currcity}],tottime+tempos[{r,currcity}]);
             }
         }
     }
@@ -705,9 +765,13 @@ set <AirBnb> getAirBnbs(string destination){
 }
 
 void book(string username){
+    time_t tim = time(0);
+    tm *gottime = localtime(&tim);
+    int today = gottime->tm_yday;
     Lodgment * stay[1000];
     map <string, vector <string> > adj = getAdjacencyList();
     map < pair <string, string>, int > costs = getTransportationCosts();
+    map < pair <string,string>, int> tempos = getTransportationTimes();
     set <string> destinos = getDestinations();
     string a,b;
     int tminic,tmaxic,hminic,hmaxic,days,opc,inx = 0;
@@ -728,7 +792,9 @@ void book(string username){
         cout<<"Suitable results ways for given budget : \n";
         posroutes.clear();
         posroutes.resize(0);
-        dfsRoutes(adj,costs,aux2,a,b,tminic,tmaxic,aux,0);
+        postimes.clear();
+        postimes.resize(0);
+        dfsRoutes(adj,costs,tempos,aux2,a,b,tminic,tmaxic,aux,0,0);
         cout<<"Suitable lodgment for the given budget (price per night): \n";
         for (auto ht : hotels){
             if (hmaxic < ht.getPrice()) break;
@@ -778,7 +844,18 @@ void book(string username){
                         if (j+1 < tamic) archivo<<"-->";
                     }
                     archivo<<"|\n";
-                    archivo<<"Lodgment|"<<to_string(loprice)<<"|"<<stay[lodgeopc]->getName()<<"|"<<stay[lodgeopc]->getLodgetype()<<"|";
+                    archivo<<"Lodgment|"<<to_string(loprice)<<"|"<<stay[lodgeopc]->getName()<<"|"<<stay[lodgeopc]->getLodgetype()<<"|\n";
+                    archivo.close();
+                }
+                archivo.open("Trips_" + to_string(today) + ".txt",ios::app);
+                if (!archivo.fail()){
+                    archivo<<username<<"|";
+                    for (int j = 0; j<tamic; j++){
+                        archivo<<posroutes[roadopc].first[j];
+                        if (j+1 < tamic) archivo<<">";
+                    }
+                    archivo<<"|\n";
+                    archivo.close();
                 }
             }
             else cout<<"Some of the options was not found, try again\n";

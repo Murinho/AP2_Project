@@ -1,2 +1,2 @@
-Berkenfield|800
-Bucarest|400
+Berkenfield|800|4
+Bucarest|400|3
