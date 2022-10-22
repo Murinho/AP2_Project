@@ -1,2 +1,3 @@
 Berkenfield|800|4
 Bucarest|400|3
+Cali|4000|10

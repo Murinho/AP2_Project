@@ -1,2 +1,3 @@
 Alondra|Berkenfield>Shanghai>Bucarest|
 Murinho|London>Munich>Berkenfield>Shanghai>Bucarest>Zurich|
+User1|Bucarest>Shanghai>Berkenfield>Zurich|
