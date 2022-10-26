@@ -2,4 +2,4 @@
 UP Travel Agency is a new option for travelers to discover the world. 
 Travel Agency emulator using Object-Oriented Programming, STL library, exceptions, files, and complex algorithms in C++.
 
-Link to Youtube video with the explanation of the project (spanish):
+Link to Youtube video with the explanation of the project (spanish): https://youtu.be/_Ke6q99L-Wg
